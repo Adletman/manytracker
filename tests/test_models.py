@@ -47,3 +47,29 @@ def test_topup_creation():
     )
     assert t.amount == Decimal("50000.00")
     assert t.user == user
+
+
+from expenses.models import Expense, ExpenseCategory
+from django.db.utils import IntegrityError
+
+
+@pytest.mark.django_db
+def test_expense_requires_category_or_custom():
+    user = User.objects.create_user(username="expenseuser", password="x" * 10)
+    cat = ExpenseCategory.objects.create(name="Такси-test")
+
+    e1 = Expense.objects.create(
+        user=user, category=cat, amount=Decimal("1500"), date=date(2026, 4, 1),
+    )
+    assert e1.category_display() == "Такси-test"
+
+    e2 = Expense.objects.create(
+        user=user, custom_category_name="Парковка", amount=Decimal("500"),
+        date=date(2026, 4, 1),
+    )
+    assert e2.category_display() == "Парковка"
+
+    from django.db import transaction
+    with pytest.raises(IntegrityError):
+        with transaction.atomic():
+            Expense.objects.create(user=user, amount=Decimal("100"), date=date(2026, 4, 1))
