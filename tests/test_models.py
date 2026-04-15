@@ -95,3 +95,19 @@ def test_validate_attachment_mime_whitelist():
 def test_validate_attachment_accepts_pdf():
     f = SimpleUploadedFile("ok.pdf", b"x", content_type="application/pdf")
     validate_attachment(f)
+
+
+from expenses.services.audit import write_audit
+from expenses.models import AuditLog
+
+
+@pytest.mark.django_db
+def test_write_audit_creates_entry():
+    user = User.objects.create_user(username="audituser", password="x" * 10)
+    entry = write_audit(
+        user=user, action=AuditLog.ACTION_CREATE,
+        entity=AuditLog.ENTITY_EXPENSE, entity_id=1,
+        diff={"amount": "1500.00"},
+    )
+    assert AuditLog.objects.count() == 1
+    assert entry.diff["amount"] == "1500.00"

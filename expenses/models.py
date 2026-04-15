@@ -110,3 +110,34 @@ class ExpenseAttachment(models.Model):
     mime_type = models.CharField(max_length=128)
     size = models.IntegerField()
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+class AuditLog(models.Model):
+    ACTION_CREATE = "create"
+    ACTION_UPDATE = "update"
+    ACTION_DELETE = "delete"
+    ACTION_CHOICES = [
+        (ACTION_CREATE, "create"),
+        (ACTION_UPDATE, "update"),
+        (ACTION_DELETE, "delete"),
+    ]
+
+    ENTITY_EXPENSE = "expense"
+    ENTITY_TOPUP = "topup"
+    ENTITY_CHOICES = [
+        (ENTITY_EXPENSE, "expense"),
+        (ENTITY_TOPUP, "topup"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+        related_name="audit_entries",
+    )
+    action = models.CharField(max_length=16, choices=ACTION_CHOICES)
+    entity = models.CharField(max_length=16, choices=ENTITY_CHOICES)
+    entity_id = models.BigIntegerField()
+    diff = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
