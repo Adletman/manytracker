@@ -1,0 +1,31 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}ManyTracker{% endblock %}</title>
+<style>
+  body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+  form { display: flex; flex-direction: column; gap: .5rem; }
+  label { font-weight: bold; }
+  input, select, textarea, button { padding: .5rem; font-size: 1rem; }
+  .errors { color: #c00; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #eee; }
+  .balance { font-size: 2rem; font-weight: bold; }
+  .balance.negative { color: #c00; }
+</style>
+</head>
+<body>
+{% if user.is_authenticated %}
+  <nav>
+    <a href="/cabinet/">Кабинет</a> |
+    <a href="/history/">История</a> |
+    <a href="/logout/">Выйти ({{ user.full_name|default:user.username }})</a>
+  </nav>
+  <hr>
+{% endif %}
+{% block content %}{% endblock %}
+</body>
+</html>
