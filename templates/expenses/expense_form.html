@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Добавить трату{% endblock %}
+{% block content %}
+<h1>{% if edit_mode %}Редактировать трату{% else %}Добавить трату{% endif %}</h1>
+{% if warning %}
+  <div class="errors">{{ warning }}</div>
+{% endif %}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="errors">{{ form.non_field_errors }}</div>{% endif %}
+  <label>{{ form.category.label }}</label>
+  {{ form.category }}
+  {{ form.category.errors }}
+
+  <label>{{ form.custom_category_name.label }}</label>
+  {{ form.custom_category_name }}
+  {{ form.custom_category_name.errors }}
+
+  <label>{{ form.amount.label }}</label>
+  {{ form.amount }}
+  {{ form.amount.errors }}
+
+  <label>{{ form.date.label }}</label>
+  {{ form.date }}
+  {{ form.date.errors }}
+
+  <label>{{ form.comment.label }}</label>
+  {{ form.comment }}
+
+  <label>Файлы (до 10 МБ каждый)</label>
+  <input type="file" name="attachments" multiple>
+
+  {% if warning %}
+    <input type="hidden" name="confirm_negative" value="on">
+  {% endif %}
+
+  <button type="submit">{% if warning %}Подтвердить{% else %}Сохранить{% endif %}</button>
+  <a href="{% url 'cabinet' %}">Отмена</a>
+</form>
+{% endblock %}
