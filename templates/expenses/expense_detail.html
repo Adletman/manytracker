@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Трата #{{ expense.id }}</h1>
+<p><strong>Дата:</strong> {{ expense.date }}</p>
+<p><strong>Категория:</strong> {{ expense.category_display }}</p>
+<p><strong>Сумма:</strong> {{ expense.amount }} ₸</p>
+<p><strong>Комментарий:</strong> {{ expense.comment|default:"—" }}</p>
+
+<h3>Файлы</h3>
+<ul>
+{% for a in expense.attachments.all %}
+  <li><a href="{% url 'attachment_download' a.id %}">{{ a.original_name }}</a></li>
+{% empty %}
+  <li>нет</li>
+{% endfor %}
+</ul>
+
+<p>
+  <a href="{% url 'expense_edit' expense.id %}">Редактировать</a> |
+  <a href="{% url 'expense_delete' expense.id %}">Удалить</a> |
+  <a href="{% url 'cabinet' %}">← назад</a>
+</p>
+{% endblock %}
