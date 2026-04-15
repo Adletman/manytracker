@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Django
+*.sqlite3
+media/
+staticfiles/
+local_settings.py
+
+# Env
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
