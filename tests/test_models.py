@@ -19,3 +19,14 @@ def test_create_superuser_flags():
     assert admin.is_admin
     assert admin.is_staff
     assert admin.is_superuser
+
+
+from expenses.models import ExpenseCategory
+
+
+@pytest.mark.django_db
+def test_expense_category_ordering():
+    c1 = ExpenseCategory.objects.create(name="Обед", sort_order=2)
+    c2 = ExpenseCategory.objects.create(name="Такси", sort_order=1)
+    names = list(ExpenseCategory.objects.values_list("name", flat=True))
+    assert names == ["Такси", "Обед"]
