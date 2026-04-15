@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Кабинет — ManyTracker{% endblock %}
+{% block content %}
+<h1>Мой баланс</h1>
+<div class="balance {% if balance < 0 %}negative{% endif %}">
+  {{ balance }} ₸
+</div>
+{% if balance < 0 %}
+  <p class="errors">Ваш баланс отрицательный — вам должны {{ balance|cut:"-" }} ₸.</p>
+{% endif %}
+
+<p><a href="{% url 'expense_create' %}"><button type="button">Добавить трату</button></a></p>
+
+<h2>Последние траты</h2>
+{% if recent_expenses %}
+<table>
+  <thead><tr><th>Дата</th><th>Категория</th><th>Сумма</th><th></th></tr></thead>
+  <tbody>
+  {% for e in recent_expenses %}
+    <tr>
+      <td>{{ e.date }}</td>
+      <td>{{ e.category_display }}</td>
+      <td>−{{ e.amount }} ₸</td>
+      <td><a href="{% url 'expense_detail' e.id %}">подробнее</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Пока ничего нет.</p>
+{% endif %}
+{% endblock %}
