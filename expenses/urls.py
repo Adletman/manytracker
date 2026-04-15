@@ -7,5 +7,6 @@ urlpatterns = [
     path("expenses/<int:pk>/", views.expense_detail, name="expense_detail"),
     path("expenses/<int:pk>/edit/", views.expense_edit, name="expense_edit"),
     path("expenses/<int:pk>/delete/", views.expense_delete, name="expense_delete"),
-    path("attachments/<int:pk>/", views.cabinet, name="attachment_download"),  # placeholder
+    path("history/", views.history, name="history"),
+    path("attachments/<int:pk>/", views.attachment_download, name="attachment_download"),
 ]

@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
+from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
 from expenses.forms import ExpenseForm
@@ -113,3 +115,39 @@ def expense_delete(request, pk):
         messages.success(request, "Трата удалена")
         return redirect("cabinet")
     return render(request, "expenses/confirm_delete.html", {"expense": expense})
+
+
+@login_required
+def history(request):
+    qs = Expense.objects.filter(user=request.user, is_deleted=False).select_related("category")
+    date_from = request.GET.get("from")
+    date_to = request.GET.get("to")
+    if date_from:
+        try:
+            qs = qs.filter(date__gte=datetime.strptime(date_from, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            qs = qs.filter(date__lte=datetime.strptime(date_to, "%Y-%m-%d").date())
+        except ValueError:
+            pass
+    topups = Topup.objects.filter(user=request.user)
+    return render(request, "expenses/history.html", {
+        "expenses": qs, "topups": topups,
+        "date_from": date_from, "date_to": date_to,
+    })
+
+
+@login_required
+def attachment_download(request, pk):
+    qs = ExpenseAttachment.objects.select_related("expense")
+    if not request.user.is_admin:
+        qs = qs.filter(expense__user=request.user)
+    att = get_object_or_404(qs, pk=pk)
+    return FileResponse(
+        att.file.open("rb"),
+        as_attachment=True,
+        filename=att.original_name,
+        content_type=att.mime_type or "application/octet-stream",
+    )
