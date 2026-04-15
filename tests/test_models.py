@@ -73,3 +73,25 @@ def test_expense_requires_category_or_custom():
     with pytest.raises(IntegrityError):
         with transaction.atomic():
             Expense.objects.create(user=user, amount=Decimal("100"), date=date(2026, 4, 1))
+
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+from expenses.validators import validate_attachment, MAX_FILE_SIZE_BYTES
+from django.core.exceptions import ValidationError
+
+
+def test_validate_attachment_size():
+    f = SimpleUploadedFile("big.pdf", b"x" * (MAX_FILE_SIZE_BYTES + 1), content_type="application/pdf")
+    with pytest.raises(ValidationError):
+        validate_attachment(f)
+
+
+def test_validate_attachment_mime_whitelist():
+    f = SimpleUploadedFile("bad.exe", b"x", content_type="application/x-msdownload")
+    with pytest.raises(ValidationError):
+        validate_attachment(f)
+
+
+def test_validate_attachment_accepts_pdf():
+    f = SimpleUploadedFile("ok.pdf", b"x", content_type="application/pdf")
+    validate_attachment(f)

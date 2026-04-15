@@ -1,7 +1,9 @@
+import uuid
 from decimal import Decimal
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
+from .validators import validate_attachment
 
 
 class ExpenseCategory(models.Model):
@@ -92,3 +94,19 @@ class Expense(models.Model):
 
     def __str__(self):
         return f"-{self.amount} ₸ {self.category_display()} ({self.user})"
+
+
+def attachment_upload_path(instance, filename):
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "bin"
+    return f"attachments/{uuid.uuid4().hex}.{ext}"
+
+
+class ExpenseAttachment(models.Model):
+    expense = models.ForeignKey(
+        Expense, on_delete=models.CASCADE, related_name="attachments",
+    )
+    file = models.FileField(upload_to=attachment_upload_path, validators=[validate_attachment])
+    original_name = models.CharField(max_length=255)
+    mime_type = models.CharField(max_length=128)
+    size = models.IntegerField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
