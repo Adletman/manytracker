@@ -1,3 +1,4 @@
+from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from telegram import Update
@@ -8,14 +9,17 @@ from bot.keyboards import main_menu_keyboard
 User = get_user_model()
 
 
-def get_user_by_telegram_id(telegram_id: int):
+def get_user_by_telegram_id_sync(telegram_id: int):
     try:
         return User.objects.get(telegram_id=telegram_id, is_active=True)
     except User.DoesNotExist:
         return None
 
 
-def link_user_by_code(code: str, telegram_id: int):
+get_user_by_telegram_id = sync_to_async(get_user_by_telegram_id_sync)
+
+
+def link_user_by_code_sync(code: str, telegram_id: int):
     now = timezone.now()
     try:
         user = User.objects.get(
@@ -31,10 +35,13 @@ def link_user_by_code(code: str, telegram_id: int):
     return user
 
 
+link_user_by_code = sync_to_async(link_user_by_code_sync)
+
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
 
-    existing = get_user_by_telegram_id(telegram_id)
+    existing = await get_user_by_telegram_id(telegram_id)
     if existing:
         await update.message.reply_text(
             f"Привет, {existing.full_name or existing.username}!",
@@ -52,7 +59,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    user = link_user_by_code(code, telegram_id)
+    user = await link_user_by_code(code, telegram_id)
     if user:
         await update.message.reply_text(
             f"Привязано! Добро пожаловать, {user.full_name or user.username}!",
@@ -64,7 +71,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def text_code_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.effective_user.id
-    if get_user_by_telegram_id(telegram_id):
+    if await get_user_by_telegram_id(telegram_id):
         return
 
     code = (update.message.text or "").strip()
@@ -72,7 +79,7 @@ async def text_code_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Введите 6-значный код из веб-кабинета.")
         return
 
-    user = link_user_by_code(code, telegram_id)
+    user = await link_user_by_code(code, telegram_id)
     if user:
         await update.message.reply_text(
             f"Привязано! Добро пожаловать, {user.full_name or user.username}!",

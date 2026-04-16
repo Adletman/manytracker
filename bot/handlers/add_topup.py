@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
+from asgiref.sync import sync_to_async
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     CallbackQueryHandler,
@@ -13,14 +14,24 @@ from telegram.ext import (
 
 from bot.handlers.start import get_user_by_telegram_id
 from bot.keyboards import main_menu_keyboard
-from expenses.services.balance import get_balance
-from expenses.services.topups import create_topup
+from expenses.services.balance import get_balance as _get_balance_sync
+from expenses.services.topups import create_topup as _create_topup_sync
 
 AMOUNT, COMMENT, CONFIRM = range(3)
 
 
+@sync_to_async
+def _get_balance(user):
+    return _get_balance_sync(user)
+
+
+@sync_to_async
+def _create_topup(**kwargs):
+    return _create_topup_sync(**kwargs)
+
+
 async def topup_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = get_user_by_telegram_id(update.effective_user.id)
+    user = await get_user_by_telegram_id(update.effective_user.id)
     if not user:
         await update.message.reply_text("Сначала привяжите аккаунт: /start")
         return ConversationHandler.END
@@ -66,7 +77,7 @@ async def confirm_yes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ud = context.user_data
     user = ud["topup_user"]
     try:
-        topup = create_topup(
+        topup = await _create_topup(
             created_by=user, user=user,
             amount=ud["topup_amount"],
             topup_date=date.today(),
@@ -77,7 +88,7 @@ async def confirm_yes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(f"Ошибка: {e}")
         return ConversationHandler.END
 
-    balance = get_balance(user)
+    balance = await _get_balance(user)
     await query.edit_message_text(
         f"✓ Приход: +{topup.amount} ₸\nБаланс: {balance} ₸",
     )

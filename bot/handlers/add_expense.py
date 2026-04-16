@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
+from asgiref.sync import sync_to_async
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     CallbackQueryHandler,
@@ -14,26 +15,46 @@ from telegram.ext import (
 from bot.handlers.start import get_user_by_telegram_id
 from bot.keyboards import main_menu_keyboard
 from expenses.models import ExpenseCategory
-from expenses.services.balance import get_balance
-from expenses.services.expenses import NegativeBalanceError, create_expense
+from expenses.services.balance import get_balance as _get_balance_sync
+from expenses.services.expenses import create_expense as _create_expense_sync
 
 CATEGORY, CUSTOM_NAME, AMOUNT, COMMENT, FILE, CONFIRM = range(6)
 
 
-def _category_keyboard():
+@sync_to_async
+def _get_category_keyboard():
     cats = list(ExpenseCategory.objects.filter(is_active=True).order_by("sort_order", "name"))
     buttons = [[InlineKeyboardButton(c.name, callback_data=f"cat_{c.id}")] for c in cats]
     buttons.append([InlineKeyboardButton("Другое", callback_data="cat_other")])
     return InlineKeyboardMarkup(buttons)
 
 
+@sync_to_async
+def _get_category(cat_id):
+    try:
+        return ExpenseCategory.objects.get(id=cat_id)
+    except ExpenseCategory.DoesNotExist:
+        return None
+
+
+@sync_to_async
+def _get_balance(user):
+    return _get_balance_sync(user)
+
+
+@sync_to_async
+def _create_expense(**kwargs):
+    return _create_expense_sync(**kwargs)
+
+
 async def expense_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = get_user_by_telegram_id(update.effective_user.id)
+    user = await get_user_by_telegram_id(update.effective_user.id)
     if not user:
         await update.message.reply_text("Сначала привяжите аккаунт: /start")
         return ConversationHandler.END
     context.user_data["expense_user"] = user
-    await update.message.reply_text("Выберите категорию:", reply_markup=_category_keyboard())
+    kb = await _get_category_keyboard()
+    await update.message.reply_text("Выберите категорию:", reply_markup=kb)
     return CATEGORY
 
 
@@ -46,9 +67,8 @@ async def category_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("Введите название категории:")
         return CUSTOM_NAME
     cat_id = int(data.replace("cat_", ""))
-    try:
-        cat = ExpenseCategory.objects.get(id=cat_id)
-    except ExpenseCategory.DoesNotExist:
+    cat = await _get_category(cat_id)
+    if not cat:
         await query.edit_message_text("Категория не найдена.")
         return ConversationHandler.END
     context.user_data["expense_category"] = cat
@@ -109,7 +129,7 @@ async def _show_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cat_name = cat.name if cat else ud.get("expense_custom_name", "")
     amount = ud["expense_amount"]
     user = ud["expense_user"]
-    balance = get_balance(user)
+    balance = await _get_balance(user)
     projected = balance - amount
 
     text = f"Расход: {cat_name}\nСумма: {amount} ₸"
@@ -131,7 +151,7 @@ async def confirm_yes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ud = context.user_data
     user = ud["expense_user"]
     try:
-        expense = create_expense(
+        expense = await _create_expense(
             user=user,
             category=ud.get("expense_category"),
             custom_name=ud.get("expense_custom_name", ""),
@@ -145,9 +165,10 @@ async def confirm_yes(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(f"Ошибка: {e}")
         return ConversationHandler.END
 
-    balance = get_balance(user)
+    balance = await _get_balance(user)
+    cat_display = await sync_to_async(expense.category_display)()
     await query.edit_message_text(
-        f"✓ Расход: −{expense.amount} ₸ ({expense.category_display()})\nБаланс: {balance} ₸",
+        f"✓ Расход: −{expense.amount} ₸ ({cat_display})\nБаланс: {balance} ₸",
     )
     return ConversationHandler.END
 

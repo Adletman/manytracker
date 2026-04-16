@@ -3,7 +3,7 @@ import pytest
 from django.utils import timezone
 from tests.factories import UserFactory
 
-from bot.handlers.start import link_user_by_code
+from bot.handlers.start import link_user_by_code_sync as link_user_by_code
 
 
 @pytest.mark.django_db
