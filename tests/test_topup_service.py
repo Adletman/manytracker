@@ -11,7 +11,7 @@ def test_create_topup_writes_record_and_audit():
     u = UserFactory()
     admin = AdminFactory()
     topup = create_topup(
-        admin=admin, user=u, amount=Decimal("50000.00"),
+        created_by=admin, user=u, amount=Decimal("50000.00"),
         topup_date=date(2026, 4, 1), comment="Аванс",
     )
     assert Topup.objects.count() == 1
@@ -24,4 +24,4 @@ def test_create_topup_rejects_non_positive():
     u = UserFactory()
     admin = AdminFactory()
     with pytest.raises(ValueError):
-        create_topup(admin=admin, user=u, amount=Decimal("0"), topup_date=date.today())
+        create_topup(created_by=admin, user=u, amount=Decimal("0"), topup_date=date.today())
