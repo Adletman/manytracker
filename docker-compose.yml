@@ -23,5 +23,13 @@ services:
     depends_on:
       - postgres
 
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    command: python manage.py run_bot
+    depends_on:
+      - postgres
+
 volumes:
   pg_data:
