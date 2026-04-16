@@ -5,27 +5,42 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}ManyTracker{% endblock %}</title>
-<style>
-  body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-  form { display: flex; flex-direction: column; gap: .5rem; }
-  label { font-weight: bold; }
-  input, select, textarea, button { padding: .5rem; font-size: 1rem; }
-  .errors { color: #c00; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #eee; }
-  .balance { font-size: 2rem; font-weight: bold; }
-  .balance.negative { color: #c00; }
-</style>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 {% if user.is_authenticated %}
-  <nav>
-    <a href="/cabinet/">Кабинет</a> |
-    <a href="/history/">История</a> |
-    <a href="/logout/">Выйти ({{ user.full_name|default:user.username }})</a>
-  </nav>
-  <hr>
+<nav class="desktop-nav">
+  <a href="{% url 'cabinet' %}" {% if active_tab == 'cabinet' %}class="active"{% endif %}>Кабинет</a>
+  <a href="{% url 'history' %}" {% if active_tab == 'history' %}class="active"{% endif %}>История</a>
+  <a href="{% url 'profile' %}" {% if active_tab == 'profile' %}class="active"{% endif %}>Профиль</a>
+  <span class="spacer"></span>
+  <a href="{% url 'logout' %}">Выйти</a>
+</nav>
 {% endif %}
-{% block content %}{% endblock %}
+
+<main class="app">
+  {% if messages %}
+  <ul class="messages">
+    {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+{% if user.is_authenticated %}
+<nav class="tab-bar">
+  <div class="tab-bar__inner">
+    <a href="{% url 'cabinet' %}" class="tab-bar__item {% if active_tab == 'cabinet' %}active{% endif %}">
+      <span class="tab-bar__icon">&#8962;</span>Кабинет
+    </a>
+    <a href="{% url 'history' %}" class="tab-bar__item {% if active_tab == 'history' %}active{% endif %}">
+      <span class="tab-bar__icon">&#9776;</span>История
+    </a>
+    <a href="{% url 'profile' %}" class="tab-bar__item {% if active_tab == 'profile' %}active{% endif %}">
+      <span class="tab-bar__icon">&#9786;</span>Профиль
+    </a>
+  </div>
+</nav>
+{% endif %}
 </body>
 </html>

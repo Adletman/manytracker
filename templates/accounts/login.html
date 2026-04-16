@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 {% block title %}Вход — ManyTracker{% endblock %}
 {% block content %}
-<h1>Вход</h1>
-<form method="post">
-  {% csrf_token %}
-  {% if form.non_field_errors %}
-    <div class="errors">{{ form.non_field_errors }}</div>
-  {% endif %}
-  {% for field in form %}
-    <label>{{ field.label }}</label>
-    {{ field }}
-  {% endfor %}
-  <button type="submit">Войти</button>
-</form>
+<div style="display:flex;flex-direction:column;align-items:center;padding-top:3rem">
+  <h1 class="page-title">ManyTracker</h1>
+  <div class="form-card" style="width:100%;max-width:360px">
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="form-errors">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% for field in form %}
+        <div class="form-group">
+          <label>{{ field.label }}</label>
+          {{ field }}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn--primary btn--full">Войти</button>
+    </form>
+  </div>
+</div>
 {% endblock %}
