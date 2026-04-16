@@ -76,7 +76,7 @@ def expense_create(request):
                 )
             messages.success(request, "Трата добавлена")
             return redirect("cabinet")
-    return render(request, "expenses/expense_form.html", {"form": form, "warning": warning})
+    return render(request, "expenses/expense_form.html", {"form": form, "warning": warning, "active_tab": "cabinet"})
 
 
 def _get_own_expense(request, pk):
@@ -89,7 +89,7 @@ def _get_own_expense(request, pk):
 @login_required
 def expense_detail(request, pk):
     expense = _get_own_expense(request, pk)
-    return render(request, "expenses/expense_detail.html", {"expense": expense})
+    return render(request, "expenses/expense_detail.html", {"expense": expense, "active_tab": "cabinet"})
 
 
 @login_required
@@ -118,7 +118,7 @@ def expense_edit(request, pk):
         messages.success(request, "Трата обновлена")
         return redirect("cabinet")
     return render(request, "expenses/expense_form.html", {
-        "form": form, "warning": None, "edit_mode": True, "expense": expense,
+        "form": form, "warning": None, "edit_mode": True, "expense": expense, "active_tab": "cabinet",
     })
 
 
@@ -132,7 +132,7 @@ def expense_delete(request, pk):
             return HttpResponseForbidden(str(exc))
         messages.success(request, "Трата удалена")
         return redirect("cabinet")
-    return render(request, "expenses/confirm_delete.html", {"expense": expense})
+    return render(request, "expenses/confirm_delete.html", {"expense": expense, "active_tab": "cabinet"})
 
 
 @login_required
@@ -190,7 +190,7 @@ def topup_create(request):
         )
         messages.success(request, "Приход добавлен")
         return redirect("cabinet")
-    return render(request, "expenses/topup_form.html", {"form": form})
+    return render(request, "expenses/topup_form.html", {"form": form, "active_tab": "cabinet"})
 
 
 @login_required
