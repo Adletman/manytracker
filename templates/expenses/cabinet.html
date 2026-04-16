@@ -1,32 +1,39 @@
 {% extends "base.html" %}
 {% block title %}Кабинет — ManyTracker{% endblock %}
 {% block content %}
-<h1>Мой баланс</h1>
-<div class="balance {% if balance < 0 %}negative{% endif %}">
-  {{ balance }} ₸
+<div class="balance-card">
+  <div class="balance-card__label">Баланс</div>
+  <div class="balance-card__amount {% if balance < 0 %}negative{% endif %}">
+    {{ balance }} ₸
+  </div>
 </div>
-{% if balance < 0 %}
-  <p class="errors">Ваш баланс отрицательный — вам должны {{ balance|cut:"-" }} ₸.</p>
-{% endif %}
 
-<p><a href="{% url 'expense_create' %}"><button type="button">Добавить трату</button></a></p>
+<div class="actions">
+  <a href="{% url 'expense_create' %}" class="btn btn--primary">Расход</a>
+  <a href="{% url 'topup_create' %}" class="btn btn--outline">Приход</a>
+</div>
 
-<h2>Последние траты</h2>
-{% if recent_expenses %}
-<table>
-  <thead><tr><th>Дата</th><th>Категория</th><th>Сумма</th><th></th></tr></thead>
-  <tbody>
-  {% for e in recent_expenses %}
-    <tr>
-      <td>{{ e.date }}</td>
-      <td>{{ e.category_display }}</td>
-      <td>−{{ e.amount }} ₸</td>
-      <td><a href="{% url 'expense_detail' e.id %}">подробнее</a></td>
-    </tr>
+<div class="ops-list__title">Последние операции</div>
+<ul class="ops-list">
+  {% for op in operations %}
+  <li>
+    <a href="{% if op.type == 'expense' %}{% url 'expense_detail' op.id %}{% else %}#{% endif %}" class="op-item">
+      <div class="op-icon {{ op.type }}">{% if op.type == 'expense' %}↓{% else %}↑{% endif %}</div>
+      <div class="op-details">
+        <div class="op-details__category">{{ op.label }}</div>
+        <div class="op-details__date">{{ op.date|date:"d.m.Y" }}</div>
+      </div>
+      <div class="op-amount {{ op.type }}">
+        {% if op.type == 'expense' %}−{% else %}+{% endif %}{{ op.amount }} ₸
+      </div>
+    </a>
+  </li>
+  {% empty %}
+  <li style="padding:1rem;text-align:center;color:var(--color-text-secondary)">Пока ничего нет</li>
   {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p>Пока ничего нет.</p>
+</ul>
+
+{% if operations %}
+<a href="{% url 'history' %}" class="link-more">Вся история →</a>
 {% endif %}
 {% endblock %}

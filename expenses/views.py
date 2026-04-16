@@ -1,4 +1,5 @@
 from datetime import datetime
+from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -21,14 +22,27 @@ from expenses.services.expenses import (
 @login_required
 def cabinet(request):
     balance = get_balance(request.user)
-    recent_expenses = Expense.objects.filter(
-        user=request.user, is_deleted=False
-    ).select_related("category")[:10]
-    recent_topups = Topup.objects.filter(user=request.user)[:5]
+    expenses = list(
+        Expense.objects.filter(user=request.user, is_deleted=False)
+        .select_related("category")[:10]
+    )
+    topups = list(Topup.objects.filter(user=request.user)[:10])
+
+    operations = sorted(
+        chain(
+            [{"type": "expense", "date": e.date, "label": e.category_display(),
+              "amount": e.amount, "id": e.id, "created_at": e.created_at} for e in expenses],
+            [{"type": "topup", "date": t.date, "label": t.comment or "Пополнение",
+              "amount": t.amount, "id": t.id, "created_at": t.created_at} for t in topups],
+        ),
+        key=lambda x: (x["date"], x["created_at"]),
+        reverse=True,
+    )[:10]
+
     return render(request, "expenses/cabinet.html", {
         "balance": balance,
-        "recent_expenses": recent_expenses,
-        "recent_topups": recent_topups,
+        "operations": operations,
+        "active_tab": "cabinet",
     })
 
 
