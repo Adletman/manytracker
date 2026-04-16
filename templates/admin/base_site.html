@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | ManyTracker Admin{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">ManyTracker Admin</a></h1>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+:root {
+  --primary: #009C96;
+  --secondary: #007A75;
+  --accent: #009C96;
+  --primary-fg: #fff;
+  --body-fg: #231815;
+  --body-bg: #FAFAFA;
+  --body-quiet-color: #6B7280;
+  --header-color: #fff;
+  --header-branding-color: #fff;
+  --header-bg: #009C96;
+  --header-link-color: #fff;
+  --breadcrumbs-fg: #fff;
+  --breadcrumbs-link-fg: #fff;
+  --breadcrumbs-bg: #007A75;
+  --link-fg: #009C96;
+  --link-hover-color: #007A75;
+  --link-selected-fg: #007A75;
+  --hairline-color: #E5E7EB;
+  --border-color: #E5E7EB;
+  --button-fg: #fff;
+  --button-bg: #009C96;
+  --button-hover-bg: #007A75;
+  --default-button-bg: #009C96;
+  --default-button-hover-bg: #007A75;
+  --close-button-bg: #6B7280;
+  --close-button-hover-bg: #4B5563;
+  --delete-button-bg: #E5002D;
+  --delete-button-hover-bg: #CC0028;
+  --object-tools-fg: #fff;
+  --object-tools-bg: #009C96;
+  --object-tools-hover-bg: #007A75;
+}
+#header { background: var(--header-bg) !important; }
+.module h2, .module caption { background: var(--primary) !important; color: var(--primary-fg) !important; }
+div.breadcrumbs { background: var(--breadcrumbs-bg) !important; color: var(--breadcrumbs-fg) !important; }
+div.breadcrumbs a { color: var(--breadcrumbs-link-fg) !important; }
+.submit-row input[type="submit"] { background: var(--button-bg); border: none; }
+.submit-row input[type="submit"]:hover { background: var(--button-hover-bg); }
+.submit-row .deletelink { background: var(--delete-button-bg) !important; }
+a:link, a:visited { color: var(--link-fg); }
+a:hover { color: var(--link-hover-color); }
+#changelist-filter h2 { background: var(--primary); color: white; }
+.object-tools a { background: var(--object-tools-bg) !important; }
+.object-tools a:hover { background: var(--object-tools-hover-bg) !important; }
+input[type="submit"], button[type="submit"] { background: var(--button-bg); color: var(--button-fg); border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; }
+input[type="submit"]:hover, button[type="submit"]:hover { background: var(--button-hover-bg); }
+</style>
+{% endblock %}
