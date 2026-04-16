@@ -1,0 +1,80 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+  .dashboard-card { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .dashboard-card h3 { color: #009C96; margin-bottom: 1rem; }
+  .stat-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .stat-box { flex: 1; min-width: 200px; background: white; border-radius: 8px; padding: 1rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .stat-box .label { font-size: 0.875rem; color: #6B7280; }
+  .stat-box .value { font-size: 1.5rem; font-weight: 700; }
+  .stat-box .value.expense { color: #E5002D; }
+  .stat-box .value.topup { color: #009C96; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 0.5rem; background: #f9fafb; border-bottom: 2px solid #E5E7EB; font-size: 0.875rem; color: #6B7280; }
+  td { padding: 0.5rem; border-bottom: 1px solid #E5E7EB; }
+  .positive { color: #009C96; font-weight: 600; }
+  .negative { color: #E5002D; font-weight: 600; }
+  .filter-form { margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: end; }
+  .filter-form label { font-size: 0.875rem; color: #6B7280; }
+  .filter-form input { padding: 0.4rem; border: 1px solid #E5E7EB; border-radius: 4px; }
+  .filter-form button { background: #009C96; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+</style>
+
+<div class="filter-form">
+  <form method="get" style="display:flex;gap:0.5rem;align-items:end">
+    <div><label>С</label><br><input type="date" name="from" value="{{ date_from }}"></div>
+    <div><label>По</label><br><input type="date" name="to" value="{{ date_to }}"></div>
+    <button type="submit">Фильтр</button>
+  </form>
+</div>
+
+<div class="stat-row">
+  <div class="stat-box">
+    <div class="label">Расходы за период</div>
+    <div class="value expense">−{{ total_expenses }} ₸</div>
+  </div>
+  <div class="stat-box">
+    <div class="label">Пополнения за период</div>
+    <div class="value topup">+{{ total_topups }} ₸</div>
+  </div>
+</div>
+
+<div class="dashboard-card">
+  <h3>Балансы сотрудников</h3>
+  <table>
+    <thead><tr><th>Сотрудник</th><th>Логин</th><th>Баланс</th></tr></thead>
+    <tbody>
+    {% for item in user_balances %}
+      <tr>
+        <td>{{ item.user.full_name|default:"—" }}</td>
+        <td>{{ item.user.username }}</td>
+        <td class="{% if item.balance >= 0 %}positive{% else %}negative{% endif %}">{{ item.balance }} ₸</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="3">Нет сотрудников</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="dashboard-card">
+  <h3>Топ-5 категорий за период</h3>
+  <table>
+    <thead><tr><th>Категория</th><th>Сумма</th></tr></thead>
+    <tbody>
+    {% for cat in top_categories %}
+      <tr>
+        <td>{{ cat.category__name }}</td>
+        <td class="expense">−{{ cat.total }} ₸</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="2">Нет данных</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
