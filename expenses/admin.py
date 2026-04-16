@@ -43,17 +43,32 @@ class ExpenseAttachmentInline(admin.TabularInline):
 class ExpenseAdmin(admin.ModelAdmin):
     list_display = (
         "date", "user", "category", "custom_category_name",
-        "amount", "comment_short", "created_via", "is_deleted", "created_at",
+        "amount", "comment_short", "attachments_display", "created_via", "is_deleted", "created_at",
     )
     list_filter = ("user", "category", "created_via", "is_deleted", "date")
     search_fields = ("comment", "custom_category_name")
     date_hierarchy = "date"
     inlines = [ExpenseAttachmentInline]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("attachments")
     actions = ["export_as_xlsx"]
 
     def comment_short(self, obj):
         return (obj.comment or "")[:40]
     comment_short.short_description = "Комментарий"
+
+    def attachments_display(self, obj):
+        atts = obj.attachments.all()
+        if not atts:
+            return "—"
+        links = []
+        for att in atts:
+            links.append(
+                format_html('<a href="/attachments/{}/preview/" target="_blank">{}</a>', att.pk, att.original_name)
+            )
+        return format_html(", ".join(str(l) for l in links))
+    attachments_display.short_description = "Вложения"
 
     def export_as_xlsx(self, request, queryset):
         import openpyxl
