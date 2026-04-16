@@ -1,40 +1,48 @@
 {% extends "base.html" %}
-{% block title %}Добавить трату{% endblock %}
+{% block title %}{% if edit_mode %}Редактировать{% else %}Новый расход{% endif %}{% endblock %}
 {% block content %}
-<h1>{% if edit_mode %}Редактировать трату{% else %}Добавить трату{% endif %}</h1>
+<h1 class="page-title">{% if edit_mode %}Редактировать расход{% else %}Новый расход{% endif %}</h1>
 {% if warning %}
-  <div class="errors">{{ warning }}</div>
+  <div class="form-errors">{{ warning }}</div>
 {% endif %}
-<form method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-  {% if form.non_field_errors %}<div class="errors">{{ form.non_field_errors }}</div>{% endif %}
-  <label>{{ form.category.label }}</label>
-  {{ form.category }}
-  {{ form.category.errors }}
-
-  <label>{{ form.custom_category_name.label }}</label>
-  {{ form.custom_category_name }}
-  {{ form.custom_category_name.errors }}
-
-  <label>{{ form.amount.label }}</label>
-  {{ form.amount }}
-  {{ form.amount.errors }}
-
-  <label>{{ form.date.label }}</label>
-  {{ form.date }}
-  {{ form.date.errors }}
-
-  <label>{{ form.comment.label }}</label>
-  {{ form.comment }}
-
-  <label>Файлы (до 10 МБ каждый)</label>
-  <input type="file" name="attachments" multiple>
-
-  {% if warning %}
-    <input type="hidden" name="confirm_negative" value="on">
-  {% endif %}
-
-  <button type="submit">{% if warning %}Подтвердить{% else %}Сохранить{% endif %}</button>
-  <a href="{% url 'cabinet' %}">Отмена</a>
-</form>
+<div class="form-card">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-group">
+      <label>{{ form.category.label }}</label>
+      {{ form.category }}
+      {% if form.category.errors %}<div class="form-error">{{ form.category.errors }}</div>{% endif %}
+    </div>
+    <div class="form-group">
+      <label>{{ form.custom_category_name.label }}</label>
+      {{ form.custom_category_name }}
+    </div>
+    <div class="form-group">
+      <label>{{ form.amount.label }}</label>
+      {{ form.amount }}
+      {% if form.amount.errors %}<div class="form-error">{{ form.amount.errors }}</div>{% endif %}
+    </div>
+    <div class="form-group">
+      <label>{{ form.date.label }}</label>
+      {{ form.date }}
+      {% if form.date.errors %}<div class="form-error">{{ form.date.errors }}</div>{% endif %}
+    </div>
+    <div class="form-group">
+      <label>{{ form.comment.label }}</label>
+      {{ form.comment }}
+    </div>
+    {% if not edit_mode %}
+    <div class="form-group">
+      <label>Файлы (до 10 МБ)</label>
+      <input type="file" name="attachments" multiple>
+    </div>
+    {% endif %}
+    {% if warning %}<input type="hidden" name="confirm_negative" value="on">{% endif %}
+    <button type="submit" class="btn btn--primary btn--full">
+      {% if warning %}Подтвердить{% else %}Сохранить{% endif %}
+    </button>
+    <a href="{% url 'cabinet' %}" class="btn btn--outline btn--full" style="margin-top:0.5rem">Отмена</a>
+  </form>
+</div>
 {% endblock %}

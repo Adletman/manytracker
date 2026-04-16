@@ -1,23 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Трата #{{ expense.id }}</h1>
-<p><strong>Дата:</strong> {{ expense.date }}</p>
-<p><strong>Категория:</strong> {{ expense.category_display }}</p>
-<p><strong>Сумма:</strong> {{ expense.amount }} ₸</p>
-<p><strong>Комментарий:</strong> {{ expense.comment|default:"—" }}</p>
-
-<h3>Файлы</h3>
-<ul>
-{% for a in expense.attachments.all %}
-  <li><a href="{% url 'attachment_download' a.id %}">{{ a.original_name }}</a></li>
-{% empty %}
-  <li>нет</li>
-{% endfor %}
-</ul>
-
-<p>
-  <a href="{% url 'expense_edit' expense.id %}">Редактировать</a> |
-  <a href="{% url 'expense_delete' expense.id %}">Удалить</a> |
-  <a href="{% url 'cabinet' %}">← назад</a>
-</p>
+<h1 class="page-title">Трата #{{ expense.id }}</h1>
+<div class="form-card">
+  <div class="form-group"><label>Дата</label><div>{{ expense.date|date:"d.m.Y" }}</div></div>
+  <div class="form-group"><label>Категория</label><div>{{ expense.category_display }}</div></div>
+  <div class="form-group"><label>Сумма</label><div style="font-weight:700;color:var(--color-danger)">−{{ expense.amount }} ₸</div></div>
+  <div class="form-group"><label>Комментарий</label><div>{{ expense.comment|default:"—" }}</div></div>
+  <div class="form-group">
+    <label>Файлы</label>
+    <ul style="list-style:none;padding:0">
+      {% for a in expense.attachments.all %}
+        <li><a href="{% url 'attachment_download' a.id %}" style="color:var(--color-primary)">{{ a.original_name }}</a></li>
+      {% empty %}
+        <li style="color:var(--color-text-secondary)">нет</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+<div style="margin-top:1rem;display:flex;gap:0.5rem">
+  <a href="{% url 'expense_edit' expense.id %}" class="btn btn--outline" style="flex:1">Редактировать</a>
+  <a href="{% url 'expense_delete' expense.id %}" class="btn btn--danger btn--sm" style="flex:1">Удалить</a>
+</div>
+<a href="{% url 'cabinet' %}" class="link-more">← назад</a>
 {% endblock %}

@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Удалить трату?</h1>
-<p>{{ expense.date }} — {{ expense.category_display }} — {{ expense.amount }} ₸</p>
-<form method="post">
-  {% csrf_token %}
-  <button type="submit">Да, удалить</button>
-  <a href="{% url 'expense_detail' expense.id %}">Отмена</a>
-</form>
+<h1 class="page-title">Удалить трату?</h1>
+<div class="form-card" style="text-align:center">
+  <p>{{ expense.date|date:"d.m.Y" }} — {{ expense.category_display }} — {{ expense.amount }} ₸</p>
+  <form method="post" style="margin-top:1rem">
+    {% csrf_token %}
+    <button type="submit" class="btn btn--danger btn--full">Да, удалить</button>
+    <a href="{% url 'expense_detail' expense.id %}" class="btn btn--outline btn--full" style="margin-top:0.5rem">Отмена</a>
+  </form>
+</div>
 {% endblock %}
