@@ -1,16 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Приход{% endblock %}
 {% block content %}
-<h1>Добавить приход</h1>
-<form method="post">
-  {% csrf_token %}
-  {% if form.non_field_errors %}<div class="errors">{{ form.non_field_errors }}</div>{% endif %}
-  {% for field in form %}
-    <label>{{ field.label }}</label>
-    {{ field }}
-    {{ field.errors }}
-  {% endfor %}
-  <button type="submit">Сохранить</button>
-  <a href="{% url 'cabinet' %}">Отмена</a>
-</form>
+<h1 class="page-title">Добавить приход</h1>
+<div class="form-card">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-group">
+      <label>{{ form.amount.label }}</label>
+      {{ form.amount }}
+      {% if form.amount.errors %}<div class="form-error">{{ form.amount.errors }}</div>{% endif %}
+    </div>
+    <div class="form-group">
+      <label>{{ form.date.label }}</label>
+      {{ form.date }}
+      {% if form.date.errors %}<div class="form-error">{{ form.date.errors }}</div>{% endif %}
+    </div>
+    <div class="form-group">
+      <label>{{ form.comment.label }}</label>
+      {{ form.comment }}
+      {% if form.comment.errors %}<div class="form-error">{{ form.comment.errors }}</div>{% endif %}
+    </div>
+    <button type="submit" class="btn btn--primary btn--full">Сохранить</button>
+    <a href="{% url 'cabinet' %}" class="btn btn--outline btn--full" style="margin-top:0.5rem">Отмена</a>
+  </form>
+</div>
 {% endblock %}
