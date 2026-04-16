@@ -11,3 +11,5 @@ factory-boy==3.3.1
 python-telegram-bot==21.5
 pytest-asyncio==0.23.8
 openpyxl==3.1.5
+dj-database-url==3.1.2
+whitenoise==6.12.0
