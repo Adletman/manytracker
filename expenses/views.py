@@ -134,23 +134,42 @@ def expense_delete(request, pk):
 
 @login_required
 def history(request):
-    qs = Expense.objects.filter(user=request.user, is_deleted=False).select_related("category")
+    expenses_qs = Expense.objects.filter(user=request.user, is_deleted=False).select_related("category")
+    topups_qs = Topup.objects.filter(user=request.user)
     date_from = request.GET.get("from")
     date_to = request.GET.get("to")
     if date_from:
         try:
-            qs = qs.filter(date__gte=datetime.strptime(date_from, "%Y-%m-%d").date())
+            d = datetime.strptime(date_from, "%Y-%m-%d").date()
+            expenses_qs = expenses_qs.filter(date__gte=d)
+            topups_qs = topups_qs.filter(date__gte=d)
         except ValueError:
             pass
     if date_to:
         try:
-            qs = qs.filter(date__lte=datetime.strptime(date_to, "%Y-%m-%d").date())
+            d = datetime.strptime(date_to, "%Y-%m-%d").date()
+            expenses_qs = expenses_qs.filter(date__lte=d)
+            topups_qs = topups_qs.filter(date__lte=d)
         except ValueError:
             pass
-    topups = Topup.objects.filter(user=request.user)
+
+    operations = sorted(
+        chain(
+            [{"type": "expense", "date": e.date, "label": e.category_display(),
+              "amount": e.amount, "id": e.id, "comment": e.comment,
+              "created_at": e.created_at} for e in expenses_qs],
+            [{"type": "topup", "date": t.date, "label": t.comment or "Пополнение",
+              "amount": t.amount, "id": t.id, "comment": t.comment,
+              "created_at": t.created_at} for t in topups_qs],
+        ),
+        key=lambda x: (x["date"], x["created_at"]),
+        reverse=True,
+    )
+
     return render(request, "expenses/history.html", {
-        "expenses": qs, "topups": topups,
+        "operations": operations,
         "date_from": date_from, "date_to": date_to,
+        "active_tab": "history",
     })
 
 

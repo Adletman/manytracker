@@ -1,40 +1,37 @@
 {% extends "base.html" %}
+{% block title %}История{% endblock %}
 {% block content %}
-<h1>История</h1>
-<form method="get">
-  <label>С</label>
-  <input type="date" name="from" value="{{ date_from|default:'' }}">
-  <label>По</label>
-  <input type="date" name="to" value="{{ date_to|default:'' }}">
-  <button type="submit">Фильтр</button>
-</form>
+<h1 class="page-title">История</h1>
+<div class="form-card" style="margin-bottom:1rem">
+  <form method="get" style="display:flex;gap:0.5rem;align-items:end">
+    <div class="form-group" style="flex:1;margin:0">
+      <label>С</label>
+      <input type="date" name="from" value="{{ date_from|default:'' }}">
+    </div>
+    <div class="form-group" style="flex:1;margin:0">
+      <label>По</label>
+      <input type="date" name="to" value="{{ date_to|default:'' }}">
+    </div>
+    <button type="submit" class="btn btn--primary btn--sm">ОК</button>
+  </form>
+</div>
 
-<h2>Траты</h2>
-<table>
-  <thead><tr><th>Дата</th><th>Категория</th><th>Сумма</th><th>Комментарий</th></tr></thead>
-  <tbody>
-  {% for e in expenses %}
-    <tr>
-      <td>{{ e.date }}</td>
-      <td>{{ e.category_display }}</td>
-      <td>−{{ e.amount }} ₸</td>
-      <td>{{ e.comment|truncatechars:50 }}</td>
-    </tr>
+<ul class="ops-list">
+  {% for op in operations %}
+  <li>
+    <a href="{% if op.type == 'expense' %}{% url 'expense_detail' op.id %}{% else %}#{% endif %}" class="op-item">
+      <div class="op-icon {{ op.type }}">{% if op.type == 'expense' %}↓{% else %}↑{% endif %}</div>
+      <div class="op-details">
+        <div class="op-details__category">{{ op.label }}</div>
+        <div class="op-details__date">{{ op.date|date:"d.m.Y" }}</div>
+      </div>
+      <div class="op-amount {{ op.type }}">
+        {% if op.type == 'expense' %}−{% else %}+{% endif %}{{ op.amount }} ₸
+      </div>
+    </a>
+  </li>
   {% empty %}
-    <tr><td colspan="4">Нет данных</td></tr>
+  <li style="padding:2rem;text-align:center;color:var(--color-text-secondary)">Нет операций за этот период</li>
   {% endfor %}
-  </tbody>
-</table>
-
-<h2>Пополнения</h2>
-<table>
-  <thead><tr><th>Дата</th><th>Сумма</th><th>Комментарий</th></tr></thead>
-  <tbody>
-  {% for t in topups %}
-    <tr><td>{{ t.date }}</td><td>+{{ t.amount }} ₸</td><td>{{ t.comment }}</td></tr>
-  {% empty %}
-    <tr><td colspan="3">Нет данных</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
+</ul>
 {% endblock %}
