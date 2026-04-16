@@ -10,5 +10,6 @@ urlpatterns = [
     path("history/", views.history, name="history"),
     path("topup/new/", views.topup_create, name="topup_create"),
     path("attachments/<int:pk>/", views.attachment_download, name="attachment_download"),
+    path("attachments/<int:pk>/preview/", views.attachment_preview, name="attachment_preview"),
     path("profile/", views.profile, name="profile"),
 ]

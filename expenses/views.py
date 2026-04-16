@@ -5,7 +5,7 @@ from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import FileResponse, HttpResponseForbidden
+from django.http import FileResponse, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -219,9 +219,41 @@ def attachment_download(request, pk):
     if not request.user.is_admin:
         qs = qs.filter(expense__user=request.user)
     att = get_object_or_404(qs, pk=pk)
+    inline = request.GET.get("inline") == "1"
     return FileResponse(
         att.file.open("rb"),
-        as_attachment=True,
+        as_attachment=not inline,
         filename=att.original_name,
         content_type=att.mime_type or "application/octet-stream",
     )
+
+
+@login_required
+def attachment_preview(request, pk):
+    qs = ExpenseAttachment.objects.select_related("expense")
+    if not request.user.is_admin:
+        qs = qs.filter(expense__user=request.user)
+    att = get_object_or_404(qs, pk=pk)
+
+    mime = att.mime_type or ""
+    name = att.original_name
+
+    if mime.startswith("image/"):
+        content = f'<img src="/attachments/{att.id}/?inline=1" style="max-width:100%;height:auto" alt="{name}">'
+    elif mime == "application/pdf":
+        content = f'<iframe src="/attachments/{att.id}/?inline=1" style="width:100%;height:80vh;border:none"></iframe>'
+    else:
+        content = f'<p>Файл: <strong>{name}</strong></p><p><a href="/attachments/{att.id}/">Скачать</a></p>'
+
+    html = f'''<!doctype html>
+<html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{name}</title>
+<style>body{{font-family:-apple-system,sans-serif;margin:2rem auto;max-width:900px;padding:0 1rem;background:#FAFAFA;color:#231815}}
+h2{{color:#009C96;margin-bottom:1rem}}a{{color:#009C96}}</style>
+</head><body>
+<h2>{name}</h2>
+{content}
+<p style="margin-top:1rem"><a href="/attachments/{att.id}/">Скачать файл</a></p>
+</body></html>'''
+    return HttpResponse(html)
