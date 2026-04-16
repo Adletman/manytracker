@@ -14,14 +14,16 @@ class ExpenseCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Topup)
 class TopupAdmin(admin.ModelAdmin):
-    list_display = ("date", "user", "amount", "comment", "created_by", "created_at")
-    list_filter = ("user", "date")
+    list_display = ("date", "user", "amount", "source", "comment", "created_by", "created_at")
+    list_filter = ("user", "date", "source")
     search_fields = ("comment",)
     date_hierarchy = "date"
 
     def save_model(self, request, obj, form, change):
         if not change and not obj.created_by_id:
             obj.created_by = request.user
+        if not change and not obj.source:
+            obj.source = "admin"
         super().save_model(request, obj, form, change)
 
 

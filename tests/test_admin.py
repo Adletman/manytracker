@@ -26,3 +26,13 @@ def test_admin_expenses_list(client):
     resp = client.get("/admin/expenses/expense/")
     assert resp.status_code == 200
     assert b"2500" in resp.content
+
+
+@pytest.mark.django_db
+def test_admin_topups_shows_source(client):
+    admin = AdminFactory()
+    u = UserFactory()
+    TopupFactory(user=u, created_by=admin)
+    client.force_login(admin)
+    resp = client.get("/admin/expenses/topup/")
+    assert resp.status_code == 200
