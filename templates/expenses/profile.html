@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<h1 class="page-title">Профиль</h1>
+<div class="form-card">
+  <div class="form-group"><label>Имя</label><div>{{ user.full_name|default:user.username }}</div></div>
+  <div class="form-group"><label>Логин</label><div>{{ user.username }}</div></div>
+</div>
+
+<h2 class="page-title" style="margin-top:1.5rem">Telegram</h2>
+<div class="form-card">
+  {% if user.telegram_id %}
+    <p>Привязан (ID: {{ user.telegram_id }})</p>
+    <form method="post" style="margin-top:0.75rem">
+      {% csrf_token %}
+      <button name="unlink_telegram" class="btn btn--outline btn--full btn--sm">Отвязать</button>
+    </form>
+  {% elif link_code %}
+    <p style="margin-bottom:0.5rem">Ваш код привязки:</p>
+    <div style="font-size:2rem;font-weight:700;letter-spacing:0.3rem;text-align:center;padding:1rem;background:var(--color-bg);border-radius:var(--radius-sm)">{{ link_code }}</div>
+    <p style="margin-top:0.75rem;font-size:0.875rem;color:var(--color-text-secondary)">
+      Отправьте боту <code>/start {{ link_code }}</code>. Код действует 10 минут.
+    </p>
+  {% else %}
+    <p style="color:var(--color-text-secondary)">Telegram не привязан</p>
+    <form method="post" style="margin-top:0.75rem">
+      {% csrf_token %}
+      <button name="generate_code" class="btn btn--primary btn--full">Привязать Telegram</button>
+    </form>
+  {% endif %}
+</div>
+
+<a href="{% url 'logout' %}" class="btn btn--outline btn--full" style="margin-top:1.5rem">Выйти</a>
+{% endblock %}

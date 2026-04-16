@@ -1,10 +1,13 @@
-from datetime import datetime
+import random
+import string
+from datetime import datetime, timedelta
 from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from expenses.forms import EmployeeTopupForm, ExpenseForm
 from expenses.models import Expense, ExpenseAttachment, Topup
@@ -188,6 +191,26 @@ def topup_create(request):
         messages.success(request, "Приход добавлен")
         return redirect("cabinet")
     return render(request, "expenses/topup_form.html", {"form": form})
+
+
+@login_required
+def profile(request):
+    link_code = None
+    if request.method == "POST" and "generate_code" in request.POST:
+        code = "".join(random.choices(string.digits, k=6))
+        request.user.telegram_link_code = code
+        request.user.telegram_link_code_expires_at = timezone.now() + timedelta(minutes=10)
+        request.user.save(update_fields=["telegram_link_code", "telegram_link_code_expires_at"])
+        link_code = code
+    elif request.method == "POST" and "unlink_telegram" in request.POST:
+        request.user.telegram_id = None
+        request.user.telegram_link_code = None
+        request.user.save(update_fields=["telegram_id", "telegram_link_code"])
+        messages.success(request, "Telegram отвязан")
+    return render(request, "expenses/profile.html", {
+        "active_tab": "profile",
+        "link_code": link_code,
+    })
 
 
 @login_required
