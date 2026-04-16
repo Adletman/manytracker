@@ -17,11 +17,15 @@ services:
     env_file: .env
     volumes:
       - ./media:/app/media
-      - ./staticfiles:/app/staticfiles
-    ports:
-      - "8000:8000"
+      - static_files:/app/staticfiles
+    expose:
+      - "8000"
     depends_on:
       - postgres
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py migrate --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3"
 
   bot:
     build: .
@@ -31,5 +35,16 @@ services:
     depends_on:
       - postgres
 
+  nginx:
+    build: ./nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - static_files:/app/staticfiles
+    depends_on:
+      - web
+
 volumes:
   pg_data:
+  static_files:
