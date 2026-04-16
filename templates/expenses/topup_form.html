@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Приход{% endblock %}
+{% block content %}
+<h1>Добавить приход</h1>
+<form method="post">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="errors">{{ form.non_field_errors }}</div>{% endif %}
+  {% for field in form %}
+    <label>{{ field.label }}</label>
+    {{ field }}
+    {{ field.errors }}
+  {% endfor %}
+  <button type="submit">Сохранить</button>
+  <a href="{% url 'cabinet' %}">Отмена</a>
+</form>
+{% endblock %}

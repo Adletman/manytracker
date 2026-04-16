@@ -5,9 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
-from expenses.forms import ExpenseForm
+from expenses.forms import EmployeeTopupForm, ExpenseForm
 from expenses.models import Expense, ExpenseAttachment, Topup
 from expenses.services.balance import get_balance
+from expenses.services.topups import create_topup
 from expenses.services.expenses import (
     EditWindowExpiredError,
     NegativeBalanceError,
@@ -137,6 +138,23 @@ def history(request):
         "expenses": qs, "topups": topups,
         "date_from": date_from, "date_to": date_to,
     })
+
+
+@login_required
+def topup_create(request):
+    form = EmployeeTopupForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        create_topup(
+            created_by=request.user,
+            user=request.user,
+            amount=form.cleaned_data["amount"],
+            topup_date=form.cleaned_data["date"],
+            comment=form.cleaned_data["comment"],
+            source="employee",
+        )
+        messages.success(request, "Приход добавлен")
+        return redirect("cabinet")
+    return render(request, "expenses/topup_form.html", {"form": form})
 
 
 @login_required

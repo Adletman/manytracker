@@ -8,5 +8,6 @@ urlpatterns = [
     path("expenses/<int:pk>/edit/", views.expense_edit, name="expense_edit"),
     path("expenses/<int:pk>/delete/", views.expense_delete, name="expense_delete"),
     path("history/", views.history, name="history"),
+    path("topup/new/", views.topup_create, name="topup_create"),
     path("attachments/<int:pk>/", views.attachment_download, name="attachment_download"),
 ]
