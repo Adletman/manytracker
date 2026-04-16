@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "expenses",
+    "bot",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -93,3 +94,5 @@ LOGOUT_REDIRECT_URL = "/login/"
 
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
+
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
