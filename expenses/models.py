@@ -19,6 +19,13 @@ class ExpenseCategory(models.Model):
 
 
 class Topup(models.Model):
+    SOURCE_ADMIN = "admin"
+    SOURCE_EMPLOYEE = "employee"
+    SOURCE_CHOICES = [
+        (SOURCE_ADMIN, "Админ"),
+        (SOURCE_EMPLOYEE, "Сотрудник"),
+    ]
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -36,6 +43,9 @@ class Topup(models.Model):
         related_name="created_topups",
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    source = models.CharField(
+        max_length=16, choices=SOURCE_CHOICES, default=SOURCE_ADMIN,
+    )
 
     class Meta:
         ordering = ["-date", "-created_at"]
