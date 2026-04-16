@@ -35,3 +35,23 @@ class ExpenseForm(forms.Form):
         if d < today - timedelta(days=365 * 2):
             raise forms.ValidationError("Дата слишком старая (старше 2 лет)")
         return d
+
+
+class EmployeeTopupForm(forms.Form):
+    amount = forms.DecimalField(
+        max_digits=12, decimal_places=2, min_value=0.01, label="Сумма (₸)",
+    )
+    date = forms.DateField(label="Дата", widget=forms.DateInput(attrs={"type": "date"}))
+    comment = forms.CharField(
+        max_length=256, label="Комментарий (от кого / за что)",
+        widget=forms.Textarea(attrs={"rows": 2}),
+    )
+
+    def clean_date(self):
+        d = self.cleaned_data["date"]
+        today = date.today()
+        if d > today:
+            raise forms.ValidationError("Дата не может быть в будущем")
+        if d < today - timedelta(days=365 * 2):
+            raise forms.ValidationError("Дата слишком старая (старше 2 лет)")
+        return d
