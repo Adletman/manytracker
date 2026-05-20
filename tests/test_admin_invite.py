@@ -57,3 +57,14 @@ def test_generate_code_get_not_allowed(client):
     client.force_login(admin)
     resp = client.get(_url(u.id))
     assert resp.status_code == 405
+
+
+@pytest.mark.django_db
+def test_user_changelist_shows_generate_button(client):
+    admin = AdminFactory()
+    u = UserFactory(username="bob")
+    client.force_login(admin)
+    resp = client.get("/admin/accounts/user/")
+    assert resp.status_code == 200
+    assert b"btn-gen-tg-code" in resp.content
+    assert str(u.id).encode() in resp.content
