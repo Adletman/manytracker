@@ -8,6 +8,16 @@ from bot.keyboards import main_menu_keyboard
 
 User = get_user_model()
 
+WELCOME_AFTER_LINK = (
+    "Привязано! Добро пожаловать, {name}!\n\n"
+    "Как пользоваться:\n"
+    "• Баланс — твой остаток\n"
+    "• Расход — добавить трату (фото чека по желанию)\n"
+    "• Приход — пополнение (с комментарием)\n"
+    "• История — последние 10 операций\n\n"
+    "Если запутался — отправь /start"
+)
+
 
 def get_user_by_telegram_id_sync(telegram_id: int):
     try:
@@ -62,7 +72,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await link_user_by_code(code, telegram_id)
     if user:
         await update.message.reply_text(
-            f"Привязано! Добро пожаловать, {user.full_name or user.username}!",
+            WELCOME_AFTER_LINK.format(name=user.full_name or user.username),
             reply_markup=main_menu_keyboard(),
         )
     else:
@@ -82,7 +92,7 @@ async def text_code_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await link_user_by_code(code, telegram_id)
     if user:
         await update.message.reply_text(
-            f"Привязано! Добро пожаловать, {user.full_name or user.username}!",
+            WELCOME_AFTER_LINK.format(name=user.full_name or user.username),
             reply_markup=main_menu_keyboard(),
         )
     else:

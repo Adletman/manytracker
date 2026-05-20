@@ -36,3 +36,15 @@ def test_link_user_expired_code():
 def test_link_user_invalid_code():
     result = link_user_by_code("000000", telegram_id=77777)
     assert result is None
+
+
+from bot.handlers.start import WELCOME_AFTER_LINK
+
+
+def test_welcome_text_contains_menu_hints():
+    text = WELCOME_AFTER_LINK.format(name="Alice")
+    assert "Alice" in text
+    assert "Баланс" in text
+    assert "Расход" in text
+    assert "Приход" in text
+    assert "История" in text
