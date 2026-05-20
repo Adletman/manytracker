@@ -5,6 +5,17 @@ from django.core.management.base import BaseCommand
 logger = logging.getLogger(__name__)
 
 
+async def error_handler(update, context):
+    logger.exception("Bot error", exc_info=context.error)
+    if update and getattr(update, "effective_message", None):
+        try:
+            await update.effective_message.reply_text(
+                "Произошла ошибка. Попробуйте /start"
+            )
+        except Exception:
+            pass
+
+
 class Command(BaseCommand):
     help = "Run the Telegram bot"
 
@@ -34,6 +45,7 @@ class Command(BaseCommand):
             text_code_handler,
         ))
         app.add_handler(get_menu_handler())
+        app.add_error_handler(error_handler)
 
         self.stdout.write("Bot starting...")
         app.run_polling(drop_pending_updates=True)
